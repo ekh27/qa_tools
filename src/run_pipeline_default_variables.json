@@ -1,0 +1,5 @@
+{
+    "CI_PIPELINE_SOURCE": "schedule",
+    "RELEASE_TEST": "false",
+    "MANUAL_TESTS": "true"
+}

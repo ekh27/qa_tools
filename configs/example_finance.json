@@ -1,0 +1,18 @@
+{
+    "project_id": 12345,
+    "ref": "main",
+    "DB_SETTINGS": "tools/JSON/envExample.json",
+    "REF_NAME_VA": "main",
+    "MANUAL_TESTS": "true",
+    "PATH_TS_FOLDER": "Features/GLOBAL/Example",
+    "NEED_VA_PATH": "true",
+    "DB_HOST": "db-server-01",
+    "DB_NAME": "example_finance_db",
+    "DB_PORT": "1541",
+    "DB_RAS_PORT": "1545",
+    "CREATE_LAUNCH_VANESSA": "true",
+    "MM_REPORT_NAME": "Тесты example_finance_db",
+    "ALLURE_LAUNCH_NAME": "MANUAL example_finance_db",
+    "BUGSTON_TESTPLAN_ID": "99999",
+    "BUGSTON_SKIP_DISCOVERY": "true"
+}

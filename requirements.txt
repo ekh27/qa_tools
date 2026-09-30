@@ -1,0 +1,16 @@
+# Зависимости проекта QA_Tools (Python 3.10+).
+# Установка в виртуальное окружение:
+#   python -m venv .venv
+#   .venv\Scripts\activate          # Windows
+#   source .venv/bin/activate       # Linux/macOS
+#   pip install -r requirements.txt
+
+# OpenAI-совместимый клиент LLM (functions.new_chat)
+openai>=1.0
+
+# HTTP-клиент для GitLab API (get_diff_mr, run_pipeline_with_config)
+requests>=2.31
+
+# Низкоуровневый HTTP (импортируется напрямую в get_diff_mr, run_pipeline_with_config);
+# входит в зависимости requests — указан явно для версии
+urllib3>=2.0

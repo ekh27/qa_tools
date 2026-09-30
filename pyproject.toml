@@ -1,0 +1,66 @@
+# Manifest и зависимости проекта QA_Tools.
+# Установка в виртуальное окружение из каталога репозитория:
+#   pip install -e .        # в режиме разработки (редактируемая установка)
+#
+# Инструменты без консольной точки входа запускаются модулем (см. README):
+#   python -m LLM_feature_description          # из каталога src/
+#   python -m Report_from_commits
+#   python -m run_pipeline_with_config
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qa-tools"
+version = "0.1.0"
+description = "Набор Python-утилит для автоматизации тестирования Vanessa Automation (1С): описание и ревью .feature-файлов через LLM, осмысленные сообщения коммитов, отчёты о работе за период, запуск GitLab-пайплайнов и контроль тегов запуска."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+authors = [{ name = "QA_Tools contributors" }]
+keywords = ["vanessa-automation", "1c", "testing", "bdd", "llm", "gitlab"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Quality Assurance",
+    "Operating System :: OS Independent",
+]
+
+dependencies = [
+    # OpenAI-совместимый клиент LLM (functions.new_chat)
+    "openai>=1.0",
+    # HTTP-клиент для GitLab API (get_diff_mr, run_pipeline_with_config)
+    "requests>=2.31",
+    # Низкоуровневый HTTP (импортируется напрямую); входит в deps requests
+    "urllib3>=2.0",
+]
+
+[project.scripts]
+# Консольные команды для инструментов, у которых есть функция main().
+# Остальные инструменты запускаются как модули, см. README.
+qa-check-gitlab = "check_gitlab_api:main"
+qa-collect-check-tags = "collect_and_check_tags:main"
+qa-tst-llm = "tst_llm:main"
+
+# Плоская раскладка без пакета: модули лежат прямо в src/.
+# Установка делает их import-доступными (из functions import ...) и
+# позволяет запускать как `python -m <имя>` из любого каталога.
+[tool.setuptools]
+package-dir = { "" = "src" }
+py-modules = [
+    "functions",
+    "GitMessageDoc",
+    "LLM_feature_AutoCheck",
+    "LLM_feature_description",
+    "LLM_file_description",
+    "Report_from_commits",
+    "check_gitlab_api",
+    "collect_and_check_tags",
+    "get_diff_mr",
+    "run_pipeline_with_config",
+    "tst_llm",
+]
