@@ -1,3 +1,10 @@
 src/settings.env
 exe/settings.env
 dist
+
+# Generated executables and launchers
+exe/*.exe
+bat/RUN_*.bat
+
+# Release archives are uploaded to GitHub Releases, not committed
+QA_Tools-*.zip
