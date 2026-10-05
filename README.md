@@ -19,6 +19,32 @@
 
 ### Установка и использование
 
+#### Быстрый старт
+
+Откройте PowerShell в корневом каталоге проекта, создайте и активируйте виртуальное окружение, затем установите зависимости:
+
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+Запустите сборщик и укажите нужные `.py`-файлы через запятую, например `get_diff_mr.py, LLM_file_description.py`:
+
+```powershell
+.\BUILD_bat\_build.bat
+```
+
+Готовые программы появятся в каталоге `dist`. Создайте каталог `exe` в корне проекта (или в текущем каталоге), переместите туда собранные программы и положите рядом рабочий файл настроек settings.env:
+
+```powershell
+New-Item -ItemType Directory -Force .\exe
+Move-Item .\dist\*.exe .\exe\
+Copy-Item .\src\settings.env .\exe\settings.env
+```
+
+После этого программы можно запускать непосредственно из `exe` или через соответствующие файлы `bat\RUN_<имя>.bat`. Файл `settings.env` должен находиться рядом с `.exe`, чтобы программы могли прочитать адреса сервисов и токены.
+
 #### Требования
 
 - **Python 3.10+**;
@@ -27,7 +53,7 @@
 
 #### Виртуальное окружение (venv)
 
-Зависимости собраны в `requirements.txt` (`openai`, `requests`, `urllib3`). Рекомендуется ставить их в изолированное окружение:
+Зависимости собраны в `requirements.txt` (`openai`, `requests`, `urllib3`, `pyinstaller`). Рекомендуется ставить их в изолированное окружение:
 
 ```bash
 # Windows
@@ -71,7 +97,7 @@ GITLAB_TOKEN=...                         # личный токен GitLab
 # DOCS_CHECKLIST_REVIEW=checklist_test_review.md
 # DOCS_USER_RULES=user_rules.md          # дополнительные (редактируемые) правила для нейронки при ревью
 # DEFAULT_VARIABLES_FILE=C:\path\to\run_pipeline_default_variables.json   # путь к JSON с дефолтными переменными пайплайна
-# DEPLOY_DIR=C:\path\to\VAtest           # каталог деплоя .exe (для BUILD\_move.bat)
+# DEPLOY_DIR=C:\path\to\VAtest           # каталог деплоя .exe (для BUILD_bat\_move.bat)
 ```
 
 Если `settings.env` нет — для LLM используется дефолтный локальный эндпоинт, для GitLab — дефолтный URL (`https://gitlab.com`), а значения, которые код не может взять из дефолтов, запрашиваются интерактивно.
@@ -108,11 +134,11 @@ src/              — все CLI-утилиты + библиотека functions
   ├── run_pipeline_default_variables.json  — дефолтные переменные пайплайна
   └── settings.env                  — настройки/токены (в .gitignore; шаблон — settings.env.example)
 bat/_common_build.bat — общий поиск Python/PyInstaller и DEPLOY_DIR (для сборки/деплоя)
-BUILD/_build.bat      — сборка инструмента .py → .exe (PyInstaller) в dist\
-BUILD/_move.bat       — деплой .exe в ПРОД (%DEPLOY_DIR%\scripts\exe\)
+BUILD_bat/_build.bat  — сборка инструмента .py → .exe (PyInstaller) в dist\
+BUILD_bat/_move.bat   — деплой .exe в ПРОД (%DEPLOY_DIR%\scripts\exe\)
 configs/              — JSON-конфиги пайплайнов (project_id, ref, переменные БД/тест-план)
 docs/                 — шаблоны описания/ревью, чек-лист и редактируемые правила (user_rules.md)
-requirements.txt      — зависимости Python (openai, requests, urllib3)
+requirements.txt      — зависимости Python (openai, requests, urllib3, pyinstaller)
 settings.env.example  — обезличенный шаблон настроек (коммитится)
 readmi_temp.md        — внутренний шаблон структуры README
 ```
@@ -153,14 +179,29 @@ python tst_llm.py
 
 Проект можно собрать в самодостаточные `.exe` и развернуть в прод-папку:
 
-```bash
-BUILD\_build.bat   # собрать src\<name>.py → dist\<name>.exe (PyInstaller), очистить остатки, сгенерировать bat\RUN_<name>.bat
-BUILD\_move.bat    # перенести собранный .exe в папку деплоя (DEPLOY_DIR в settings.env)
+`BUILD_bat\_build.bat` необходимо запускать под виртуальным окружением проекта. Окружение должно находиться в `.venv` (допускается также `venv`) и содержать зависимости из `requirements.txt`, включая PyInstaller:
+
+```bat
+python -m venv .venv
+.venv\Scripts\activate.bat
+python -m pip install -r requirements.txt
+BUILD_bat\_build.bat
 ```
+
+При запуске `BUILD_bat\_build.bat` сам активирует найденное окружение `.venv`/`venv`. Скрипт принимает один `.py`-файл или несколько файлов, перечисленных через запятую:
+
+```bat
+BUILD_bat\_build.bat src\get_diff_mr.py
+BUILD_bat\_build.bat "src\get_diff_mr.py, src\LLM_file_description.py"
+```
+
+Без аргументов скрипт запрашивает тот же список интерактивно. Для каждого файла он последовательно собирает `dist\<name>.exe`, очищает остаточные файлы PyInstaller и создаёт `bat\RUN_<name>.bat`. Для файлов из `src` можно вводить только имя, например `get_diff_mr.py, LLM_file_description.py`.
+
+`BUILD_bat\_move.bat` переносит собранный `.exe` в папку деплоя (`DEPLOY_DIR` в `settings.env`).
 
 - Поиск Python/PyInstaller задаётся в `bat/_common_build.bat` (переопределяется переменной `PY`).
 - Каталог деплоя задаётся ключом `DEPLOY_DIR` в корневом `settings.env` (бат-сборка читает его и раскладывает в `%DEPLOY_DIR%\scripts\exe\`).
-- `.exe` читают настройки из своей директории, поэтому `BUILD\_move.bat` при переносе кладёт рядом с exe рантайм-файлы: `settings.env` (из `src/settings.env` — единый живой конфиг; шаблон `settings.env.example` в деплое не участвует) и `run_pipeline_default_variables.json`. Если живого конфига нет — деплой прерывается, чтобы не оставить ПРОД без настроек.
+- `.exe` читают настройки из своей директории, поэтому `BUILD_bat\_move.bat` при переносе кладёт рядом с exe рантайм-файлы: `settings.env` (из `src/settings.env` — единый живой конфиг; шаблон `settings.env.example` в деплое не участвует) и `run_pipeline_default_variables.json`. Если живого конфига нет — деплой прерывается, чтобы не оставить ПРОД без настроек.
 
 ### Пример работы
 

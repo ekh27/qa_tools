@@ -14,3 +14,6 @@ requests>=2.31
 # Низкоуровневый HTTP (импортируется напрямую в get_diff_mr, run_pipeline_with_config);
 # входит в зависимости requests — указан явно для версии
 urllib3>=2.0
+
+# Сборка исполняемых файлов (BUILD_bat/_build.bat)
+pyinstaller
